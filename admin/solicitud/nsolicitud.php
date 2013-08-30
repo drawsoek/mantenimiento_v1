@@ -4,24 +4,31 @@
 			<div class="module_content">
 
 <?php
-/*
-	include("../db/conexionMysql.php");
-	$mysql = new mysql;
-	$mysql->connect();
 
-	$sql = $mysql->query("SELECT * FROM aficha WHERE ALUFIC = '".$_POST['nombre']."'")or die(mysql_error());
+
+	$sql = $mysql->query("SELECT * FROM areas")or die(mysql_error());
 	$result = $mysql->f_array($sql);
-	*/
+
+
+
 ?>
 <h1>SOLICITUD MANTEMIMIENTO CORRECTIVO</h1>
+<?php
+	if(!empty($_POST['enviado'])){
+		$mysql->query("INSERT INTO solicitudes_mto VALUES(0, ".$_SESSION['idusuario'].", '".$_POST['area']."', NOW(), '".$_POST['descripcion']."', 1, '".$_POST['dirige']."')")or die(mysql_error());
+		echo '<h4 class="alert_success">Solicitud guardada correctamente</h4>';
+	}
+
+?>
+<form name="nsol" action="index.php?o=ns" method="post">
 <fieldset>
 
 <fieldset class="lineafield" style="width:45%; float:right; margin-top:39px;  margin-right:5px;">
  	<label style="font-size:10px; width:100%">Departamento a quien se dirige la solicitud:</label>
  	<div class="clear"></div>
-        <input type="checkbox" style="margin-bottom:6px;" name="remase" value="1">Recursos Materiales y Servicios<br>
-        <input type="checkbox" style="margin-bottom:6px;" name="mante" value="2">Mantenimiento de Equipo<br>
-        <input type="checkbox" style="margin-bottom:6px;" name="cc" value="3">Centro de Computo<br>
+        <input type="radio" style="margin-bottom:6px;" name="dirige" value="1">Recursos Materiales y Servicios<br>
+        <input type="radio" style="margin-bottom:6px;" name="dirige" value="2">Mantenimiento de Equipo<br>
+        <input type="radio" style="margin-bottom:6px;" name="dirige" value="3">Centro de Computo<br>
 </fieldset>
 
 
@@ -31,10 +38,12 @@
 <label>Area Solicitante:</label>
 <div class="clear"></div>
 <fieldset style="width:90%; float:left; margin-right: 3%; margin-left: 2px;">
-	Area: <select style="width:46%;" name="area" id="areso">
-
-            <option value="1">Departamentos</option>
-            <option value="2">Departamentos</option>
+	Area: <select style="width:46%;" name="area" id="area">
+                                        <?php
+                                            do{
+                                                echo "<option value='".$result['id_area']."'>".$result['nombre']."</option>";
+                                            }while($result = $mysql->f_array($sql));
+                                        ?>
 	</select>
 </fieldset>
 </fieldset>
@@ -44,7 +53,7 @@
 	
 <fieldset style="width:50%; margin-left:10px; float:left; margin-top:32px;">
 	<label>Nombre y Firma Del Solicitante</label><br>
-	<input type="text" style="width:50%;" name="nomyf" id="nyf">
+	<input type="text" style="width:50%;" name="firma" id="firma">
 	<div class="clear"></div>
 </fieldset>
 
@@ -52,7 +61,10 @@
 <fieldset class="lineafield" style="width:46%; margin-left:2px; margin-right:5px; float:right;">
 	<div class="clear"></div>
 	<label>Fecha de Elaboracion:</label>
-	<input type="text" id="fecha" style="width:80%">
+	<?php
+	$fecha = new DateTime();
+	?>
+	<input type="text" id="fecha" readonly="readonly" style="width:80%" value="<?= $fecha->format('Y-m-d H:i') ?>">
 <div class="clear"></div>
 </fieldset>
 
@@ -63,7 +75,7 @@
 	<div class="clear"></div>
 	<label>DESCRIPCION DEL SERVICIO SOLICITADO O FALLA A REPARAR</label>
 <div class="clear"></div>
- <textarea row="5"></textarea>
+ <textarea name="descripcion" row="5"></textarea>
 
 </fieldset>
 
@@ -73,9 +85,9 @@
 		<br>
 		<p style="margin-left:5px;">
 	  
-		<a class="btn btn-success" href="pdf/ejemplopdf.php?f=<?= $result['ALUFIC'] ?>&token=ZHJhd3NvZWs=" target="_BLANK" id="finalizar_btn"><i class="icon-ok icon-white"></i>Finalizar</a>
-		</p>
+		<input type="submit" class="btn btn-success" value="ENVIAR" name="enviado">
 </fieldset>
+</form>
 <?php
 //libera memoria
 /*

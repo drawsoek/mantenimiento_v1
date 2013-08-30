@@ -44,10 +44,15 @@
 </head>
 <body>
 <?php
+include("db/conexionMysql.php");
+$mysql = new mysql;
+$mysql->connect();
 	$fallo = false;
 	if(!empty($_POST['enviado'])){
-		if(($_POST['usuario'] == "itc") and ($_POST['password'] == "35c0l4r35itc")){
-			$_SESSION['usuario'] = "ITC";
+		$query = @$mysql->query("SELECT * FROM usuarios where nombre = '".$_POST['usuario']."' and password = '".$_POST['password']."'");
+        if(@$result = $mysql->f_array($query)){
+			$_SESSION['usuario'] = $result['nombre'];
+            $_SESSION['idusuario'] = $result['id_usuario'];
 			@header("Location: index.php");
 		}else{
 			$fallo = true;

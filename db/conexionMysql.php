@@ -4,7 +4,7 @@ class mysql {
     
     var $server = "localhost";
     var $user = "root";
-    var $pass = "123456";
+    var $pass = "root";
     var $data_base = "mantenimiento";
     var $conexion;
     var $flag = false;

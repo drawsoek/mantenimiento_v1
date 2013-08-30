@@ -2,31 +2,30 @@
 header("Content-type: text/x-json");
 
 // nos conectamos
-$conex = mysql_connect('itculiacan.edu.mx','programacion','W0lfr4m10*itc')or die ('Error: imposible conectar con MySQL');
+$conex = mysql_connect('localhost','root','123456')or die ('Error: imposible conectar con MySQL');
 //$conex = mysql_connect('localhost','root','root')or die ('Error: imposible conectar con MySQL');
 // seleccionamos la db
-$db = mysql_select_db('fichasdb')or die ('Error: no se puede seleccionar la base de datos');
+$db = mysql_select_db('mantenimiento')or die ('Error: no se puede seleccionar la base de datos');
 
 // armamos las condiciones segun sea el caso ..
 if($_POST['query']!=''){
-	if($_POST['qtype'] == "fecha"){ $tabla = "citas"; }else{ $tabla = "aficha"; } 
-   $where = "WHERE $tabla.".mysql_real_escape_string($_POST['qtype'])." LIKE '%".
+	$where = "WHERE ".mysql_real_escape_string($_POST['qtype'])." LIKE '%".
 mysql_real_escape_string($_POST['query'])."%' ";
 }elseif($_POST['letter_pressed']!=''){
-   $where = "WHERE $tabla.".mysql_real_escape_string($_POST['qtype'])." LIKE '".
+   $where = "WHERE ".mysql_real_escape_string($_POST['qtype'])." LIKE '".
 mysql_real_escape_string($_POST['letter_pressed'])."%' ";
 }elseif($_POST['letter_pressed']=='#'){
-   $where = "WHERE $tabla.".mysql_real_escape_string($_POST['qtype'])." REGEXP '[[:digit:]]' ";
+   $where = "WHERE ".mysql_real_escape_string($_POST['qtype'])." REGEXP '[[:digit:]]' ";
 }else{
-   $where ='';
+   $where ='WHERE id_usuario = 1';
 }
 // conseguimos el total de registros
-$result = mysql_query('SELECT COUNT(aficha.ALUFIC) FROM aficha INNER JOIN citas ON (aficha.ALUFIC = citas.ALUFIC)'.$where."AND (citas.status = 1 or citas.status = 2) AND citas.fecha = CURDATE()");
+$result = mysql_query('SELECT COUNT(id_usuario) FROM solicitudes_mto where id_usuario = 1');
 $row = mysql_fetch_array($result);
 $total = $row[0];
 
 // ordenar por X campo
-$sortname = empty($_POST['sortname']) ? 'name' : mysql_real_escape_string($_POST['sortname']);
+$sortname = empty($_POST['sortname']) ? 'fecha' : mysql_real_escape_string($_POST['sortname']);
 
 // orden ascendente o descendente
 $sortorder = empty($_POST['sortorder']) ? 'desc' : mysql_real_escape_string($_POST['sortorder']);
@@ -53,12 +52,13 @@ $arrDatos = array('page' => $page,'total' => $total);
 // consulta general
 
 //$result = mysql_query("SELECT ALUFIC, ALUAPP, ALUAPM, ALUNOM FROM aficha $where $sort $limit");
-$result = mysql_query("SELECT aficha.ALUFIC, aficha.ALUAPP, aficha.ALUAPM, aficha.ALUNOM  FROM aficha INNER JOIN citas ON (aficha.ALUFIC = citas.ALUFIC) $where AND (citas.status = 1 or citas.status = 2) AND citas.fecha = CURDATE() $sort $limit");
+
+$result = mysql_query("SELECT id_solicitud, fecha, descripcion, depto, id_status FROM solicitudes_mto $where $sort $limit");
 while ($row = mysql_fetch_assoc($result)) {
    $arrDatos['rows'][] = array(
-     'id' => $row['ALUFIC'],
+     'id' => $row['id_solicitud'],
      'cell' => array(
-        utf8_encode($row['ALUFIC']),utf8_encode($row['ALUAPP']),utf8_encode($row['ALUAPM']),utf8_encode($row['ALUNOM'])
+        utf8_encode($row['fecha']),utf8_encode($row['descripcion']),$row['depto'], $row['id_status']
      )
   );
 }
